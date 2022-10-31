@@ -8,9 +8,10 @@ import {
   Scripts,
   ScrollRestoration,
 } from '@remix-run/react'
+import { getUserById } from './models/user.server'
+import { authenticator } from './services/auth.server'
 
 import tailwindStylesheetUrl from './styles/tailwind.css'
-import { getUser } from './session.server'
 
 export const links: LinksFunction = () => {
   return [{ rel: 'stylesheet', href: tailwindStylesheetUrl }]
@@ -18,13 +19,15 @@ export const links: LinksFunction = () => {
 
 export const meta: MetaFunction = () => ({
   charset: 'utf-8',
-  title: 'Remix Notes',
+  title: 'Hotel Rental',
   viewport: 'width=device-width,initial-scale=1',
 })
 
 export async function loader({ request }: LoaderArgs) {
+  const userId = await authenticator.isAuthenticated(request)
+
   return json({
-    user: await getUser(request),
+    user: userId ? await getUserById(userId) : null,
   })
 }
 
