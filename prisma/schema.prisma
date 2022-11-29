@@ -8,17 +8,224 @@ generator client {
 }
 
 model User {
-  id       String  @id @default(cuid())
-  email    String  @unique
-  username String  @unique
-  name     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  password Password?
+  id        String    @id @default(cuid())
+  email     String    @unique
+  username  String    @unique
+  name      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  password  Password?
+
+  contactInfo ContactInfo?
+
+  bookings     Booking[]
+  roomReviews  RoomReview[]
+  hotelReviews HotelReview[]
+
+  host  Host?
+  admin Admin?
+
+  messages Message[]
+  chats    Chat[]
 }
 
 model Password {
   hash String
+
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String @unique
+}
+
+model ContactInfo {
+  id      String  @id @default(cuid())
+  phone   String?
+  address String?
+  city    String?
+  state   String?
+  zip     String?
+  country String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
+}
+
+//Can add Hotels
+model Host {
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
+
+  bio String?
+
+  chats Chat[]
+
+  hotels Hotel[]
+}
+
+model Admin {
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
+}
+
+model Hotel {
+  id      String  @id @default(cuid())
+  name    String
+  address String?
+  city    String?
+  state   String?
+  zip     String?
+  phone   String?
+  email   String?
+
+  type   HotelType @relation(fields: [typeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  typeId String
+
+  latitude  Float?
+  longitude Float?
+
+  facility HotelFacility[]
+
+  description String?
+  imageUrl    String
+
+  socialLink Links[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  host   Host   @relation(fields: [hostId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  hostId String
+
+  reviews HotelReview[]
+
+  rooms Room[]
+}
+
+model Links {
+  id         String @id @default(cuid())
+  name       String
+  baseUrl    String
+  profileUrl String
+  hotel      Hotel  @relation(fields: [hotelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  hotelId    String @unique
+}
+
+model Room {
+  id          String  @id @default(cuid())
+  type        String?
+  description String?
+  imageUrl    String
+
+  noOfBeds   Int?
+  noOfBaths  Int?
+  noOfGuests Int?
+
+  pricePerNight Float?
+
+  availableRooms Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  hotel   Hotel  @relation(fields: [hotelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  hotelId String
+
+  bookings Booking[]
+  reviews  RoomReview[]
+}
+
+model Booking {
+  id       String   @id @default(cuid())
+  checkIn  DateTime
+  checkOut DateTime
+
+  totalCost   Float?
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  roomId String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String
+}
+
+model RoomReview {
+  id      String  @id @default(cuid())
+  rating  Int
+  comment String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  roomId String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String
+}
+
+model HotelReview {
+  id      String  @id @default(cuid())
+  rating  Int
+  comment String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  hotel   Hotel  @relation(fields: [hotelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  hotelId String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String
+}
+
+model HotelType {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  hotels Hotel[]
+}
+
+model HotelFacility {
+  id          String  @id @default(cuid())
+  name        String
+  imageUrl    String?
+  description String?
+
+  hotel   Hotel  @relation(fields: [hotelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  hotelId String
+}
+
+model Chat {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String
+
+  host   Host   @relation(fields: [hostId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  hostId String
+
+  messages Message[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sender   User   @relation(fields: [senderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  senderId String
+
+  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  chatId String
 }
